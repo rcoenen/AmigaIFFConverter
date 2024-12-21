@@ -28,8 +28,8 @@ php iff_convertor.php input.jpg output.iff 640 256 4 true true
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/amiga-iff-converter.git
-cd amiga-iff-converter
+git clone https://github.com/rcoenen/AmigaIFFConverter.git
+cd AmigaIFFConverter
 ```
 
 2. Requirements:

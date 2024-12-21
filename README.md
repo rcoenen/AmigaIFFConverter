@@ -4,9 +4,17 @@ Convert modern image formats (JPEG, PNG) to the classic Amiga IFF ILBM format. T
 
 ## Why?
 
-Because why not? This tool lets you create images for a legendary computer system, the Commodore Amiga, just because you can. While plenty of tools can view or open IFF/ILBM files, very few actually let you create them. 
+Why not? This tool lets you create images for a legendary computer system, the Commodore Amiga, just because you can. While plenty of tools can view or open IFF/ILBM files, very few actually let you create them. 
 
-Also, I was curious to see if it’s even possible to write such a tool in PHP. The last time I tried something like this was over 20 years ago—on an actual Amiga! This project is a way to test those limits, relive some nostalgia, and celebrate the creative quirks of the Amiga graphics legacy.
+Also, I was curious to see if it’s even possible to write such a tool in a language such as PHP. This project is a way to test those limits, relive some nostalgia, and celebrate the creative quirks of the Amiga graphics legacy.
+
+### HAM Artifacts
+
+The **[Hold-And-Modify (HAM)](https://en.wikipedia.org/wiki/Hold-And-Modify)** mode is iconic to the Amiga, but it comes with its quirks. HAM6 only allows 16 base colors and relies on modifying the previous pixel’s color to create a high-color effect. This can lead to noticeable color fringing, particularly along horizontal scanlines where sharp contrasts meet. 
+
+For example, in images with large horizontal gradients or sharp color transitions—such as where a yellow car body meets black text—HAM may require intermediate pixels to approximate the desired color. The result is a "color fringing" artifact that is characteristic of HAM6's limitations.
+
+I actually enjoy seeing these artifacts, especially on modern Retina-powered MacBooks. Yes, it’s nerdy and geeky but it is fascinating to see the creative constraints of a 1990s computer system juxtaposed with today’s high-resolution displays!
 
 ## Quick Start
 

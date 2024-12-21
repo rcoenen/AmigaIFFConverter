@@ -83,19 +83,24 @@ class FileWriter
         fwrite($fp, $packedData);
     }
 
-    private function writeCMAPChunk($fp, $palette)
+    private function writeCMAPChunk($fp, $palette, $chipset = 'ECS')
     {
         fwrite($fp, self::CMAP_CHUNK);
-
-        $cmapSize = count($palette) * 3; // 3 bytes per color (RGB)
+        $cmapSize = count($palette) * 3;
         fwrite($fp, pack("N", $cmapSize));
 
-        // Write each color's RGB values
         foreach ($palette as $color) {
-            // Scale up from 0-15 to 0-255 range if necessary
-            $r = isset($color['r']) ? ($color['r'] > 15 ? $color['r'] : $color['r'] * 17) : 0;
-            $g = isset($color['g']) ? ($color['g'] > 15 ? $color['g'] : $color['g'] * 17) : 0;
-            $b = isset($color['b']) ? ($color['b'] > 15 ? $color['b'] : $color['b'] * 17) : 0;
+            if ($chipset === 'ECS') {
+                                       // Scale RGB to 0-15 range for ECS compatibility
+                $r = $color['r'] * 17; // Scale 0-15 to 0-255
+                $g = $color['g'] * 17;
+                $b = $color['b'] * 17;
+            } elseif ($chipset === 'AGA') {
+                // Use full 24-bit color values for AGA (future support)
+                $r = $color['r'];
+                $g = $color['g'];
+                $b = $color['b'];
+            }
 
             fwrite($fp, pack("C*", $r, $g, $b));
         }

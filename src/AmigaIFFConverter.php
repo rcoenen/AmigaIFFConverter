@@ -40,22 +40,26 @@ class AmigaIFFConverter
             $sourceImage = $this->imageProcessor->resizeImage($sourceImage, $options['width'], $options['height']);
         }
 
-        if (isset($options['ham']) && $options['ham']) {
-            // HAM mode logic
+        // Validate chipset and determine processing logic
+        if (! isset($options['chipset'])) {
+            $options['chipset'] = 'ECS'; // Default to ECS if not specified
+        }
+
+        if ($options['chipset'] === 'ECS') {
+            // ECS Standard Mode Logic
             list($palette, $palettedImage) = $this->imageProcessor->extractPalette(
                 $sourceImage,
-                16,  // HAM mode requires 16 base colors
-                false// No dithering for HAM mode
+                $options['colors'], // Limit to 32 colors for ECS
+                $options['dither'], // Apply dithering if specified
+                'ECS'               // Pass chipset to ensure compatibility
             );
-            $bitplanes = $this->hamConverter->convertToHAM($sourceImage, $palette);
-        } else {
-            // Standard mode logic
-            list($palette, $palettedImage) = $this->imageProcessor->extractPalette(
-                $sourceImage,
-                $options['colors'], // Colors defined in CLI options
-                $options['dither']
-            );
+
             $bitplanes = $this->bitplaneConverter->convertToBitplanes($palettedImage, $palette);
+        } elseif ($options['chipset'] === 'AGA') {
+            // Placeholder for future AGA logic
+            throw new \Exception("AGA chipset support is not implemented yet.");
+        } else {
+            throw new \Exception("Invalid chipset option: {$options['chipset']}. Use ECS or AGA.");
         }
 
         // Write the final IFF file
@@ -65,4 +69,5 @@ class AmigaIFFConverter
         imagedestroy($sourceImage);
         imagedestroy($palettedImage);
     }
+
 }

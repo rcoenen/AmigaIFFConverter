@@ -30,7 +30,7 @@
     // Show help if no arguments
     if ($argc < 2 || in_array('--help', $argv) || in_array('-h', $argv)) {
         echo <<<HELP
-		Usage: php iff_convertor.php [options]
+				Usage: php iff_convertor.php [options]
 
 Required:
   --input=<file>    Input JPEG or PNG file
@@ -73,6 +73,12 @@ HELP;
                     case 'compress':
                     case 'ham':
                         $value = filter_var($value, FILTER_VALIDATE_BOOLEAN);
+                        break;
+                    case 'chipset':
+                        $value = strtoupper($value);
+                        if (! in_array($value, ['ECS', 'AGA'])) {
+                            throw new Exception("Invalid chipset option: $value. Use ECS or AGA.");
+                        }
                         break;
                 }
 

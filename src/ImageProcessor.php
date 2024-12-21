@@ -52,41 +52,61 @@ class ImageProcessor
         return $resized;
     }
 
-    public function extractPalette($image, $maxColors, $dither = true)
+    public function extractPalette($image, $maxColors, $dither = true, $chipset = 'ECS')
     {
-        // Create working copy with black background
-        $workingImage = imagecreatetruecolor(imagesx($image), imagesy($image));
-        $black        = imagecolorallocate($workingImage, 0, 0, 0);
-        imagefill($workingImage, 0, 0, $black);
-        imagecopy($workingImage, $image, 0, 0, 0, 0, imagesx($image), imagesy($image));
+        // Determine maximum colors based on chipset
+        if ($chipset === 'ECS') {
+            $maxColors = min($maxColors, 32); // Limit to 32 colors for ECS
+        } elseif ($chipset === 'AGA') {
+            $maxColors = min($maxColors, 256); // Future support for 256 colors for AGA
+        }
 
-        // First convert without dithering to get base palette
-        imagetruecolortopalette($workingImage, false, $maxColors);
+        // Create a new image clamped to 12-bit RGB (Amiga ECS palette)
+        $clampedImage = imagecreatetruecolor(imagesx($image), imagesy($image));
+        for ($y = 0; $y < imagesy($image); $y++) {
+            for ($x = 0; $x < imagesx($image); $x++) {
+                $color = imagecolorat($image, $x, $y);
 
-        // Create final image with black background
-        $palettedImage = imagecreatetruecolor(imagesx($image), imagesy($image));
-        $black         = imagecolorallocate($palettedImage, 0, 0, 0);
-        imagefill($palettedImage, 0, 0, $black);
-        imagecopy($palettedImage, $image, 0, 0, 0, 0, imagesx($image), imagesy($image));
+                // Extract 24-bit RGB values
+                $r = ($color >> 16) & 0xFF;
+                $g = ($color >> 8) & 0xFF;
+                $b = $color & 0xFF;
 
-        // Now convert with dithering if enabled
-        imagetruecolortopalette($palettedImage, $dither, $maxColors);
+                // Clamp to 12-bit (ECS range: 0-15)
+                $r = (int) ($r / 16) * 16;
+                $g = (int) ($g / 16) * 16;
+                $b = (int) ($b / 16) * 16;
 
-        // Get palette from working image to maintain consistency
+                // Allocate the clamped color to the new image
+                $newColor = imagecolorallocate($clampedImage, $r, $g, $b);
+                imagesetpixel($clampedImage, $x, $y, $newColor);
+            }
+        }
+
+        // Reduce the clamped image to the desired number of colors
+        imagetruecolortopalette($clampedImage, $dither, $maxColors);
+
+        // Extract the palette from the reduced image
         $palette = [];
         for ($i = 0; $i < $maxColors; $i++) {
-            $color     = imagecolorsforindex($workingImage, $i);
+            $color = imagecolorsforindex($clampedImage, $i);
+
+            // Convert to 12-bit RGB (0-15 range for ECS compatibility)
             $palette[] = [
-                'r' => $color['red'],
-                'g' => $color['green'],
-                'b' => $color['blue'],
+                'r' => (int) ($color['red'] / 16),
+                'g' => (int) ($color['green'] / 16),
+                'b' => (int) ($color['blue'] / 16),
             ];
         }
 
-        // Ensure first color is black (background)
+        // Ensure the first palette color is black (for background compatibility)
         $palette[0] = ['r' => 0, 'g' => 0, 'b' => 0];
 
-        imagedestroy($workingImage);
-        return [$palette, $palettedImage];
+        // Clean up
+        imagedestroy($clampedImage);
+
+        // Return the palette and the reduced image
+        return [$palette, $clampedImage];
     }
+
 }

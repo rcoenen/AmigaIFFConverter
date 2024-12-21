@@ -6,22 +6,6 @@ namespace App\AmigaIFFConverter;
 
 class BitplaneConverter
 {
-    private function initializeBitplanes($width, $height, $bitplanes)
-    {
-        $rowBytes     = ceil($width / 8);
-        $padding      = $rowBytes % 2 ? 1 : 0;
-        $bitplaneData = [];
-
-        // Initialize one row at a time instead of all at once
-        for ($plane = 0; $plane < $bitplanes; $plane++) {
-            $bitplaneData[$plane] = [];
-            for ($y = 0; $y < $height; $y++) {
-                $bitplaneData[$plane][$y] = array_fill(0, $rowBytes + $padding, 0);
-            }
-        }
-        return $bitplaneData;
-    }
-
     public function convertToBitplanes($image, array $palette)
     {
         $width     = imagesx($image);
@@ -38,21 +22,38 @@ class BitplaneConverter
                 $byteOffset = floor($x / 8);
                 $bitOffset  = 7 - ($x % 8);
 
-                // Extract bits in original order
+                // Distribute bits to the corresponding bitplanes
                 for ($plane = 0; $plane < $bitplanes; $plane++) {
-                    $bit = ($colorIndex >> $plane) & 1; // Original bit order
+                    $bit = ($colorIndex >> $plane) & 1;
                     if ($bit) {
                         $bitplaneData[$plane][$y][$byteOffset] |= (1 << $bitOffset);
                     }
                 }
             }
 
-            // Free memory periodically
-            if ($y % 50 == 0) {
+            // Free memory periodically for large images
+            if ($y % 50 === 0) {
                 gc_collect_cycles();
             }
         }
 
         return $bitplaneData;
     }
+
+    private function initializeBitplanes($width, $height, $bitplanes)
+    {
+        $rowBytes     = ceil($width / 8);      // Bytes per row (each byte = 8 pixels)
+        $padding      = $rowBytes % 2 ? 1 : 0; // Add padding if odd number of bytes
+        $bitplaneData = [];
+
+        for ($plane = 0; $plane < $bitplanes; $plane++) {
+            $bitplaneData[$plane] = [];
+            for ($y = 0; $y < $height; $y++) {
+                $bitplaneData[$plane][$y] = array_fill(0, $rowBytes + $padding, 0);
+            }
+        }
+
+        return $bitplaneData;
+    }
+
 }

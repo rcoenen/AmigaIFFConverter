@@ -12,12 +12,25 @@ class ImageProcessor
         switch ($extension) {
             case 'jpg':
             case 'jpeg':
-                return imagecreatefromjpeg($file);
+                $img = imagecreatefromjpeg($file);
+                break;
             case 'png':
-                return imagecreatefrompng($file);
+                $img = imagecreatefrompng($file);
+                break;
             default:
                 throw new Exception("Unsupported image format");
         }
+
+        // Create a new true color image with black background
+        $newImg = imagecreatetruecolor(imagesx($img), imagesy($img));
+        $black  = imagecolorallocate($newImg, 0, 0, 0);
+        imagefill($newImg, 0, 0, $black);
+
+        // Copy the image onto black background
+        imagecopy($newImg, $img, 0, 0, 0, 0, imagesx($img), imagesy($img));
+        imagedestroy($img);
+
+        return $newImg;
     }
 
     public function resizeImage($image, $targetWidth, $targetHeight)
@@ -30,21 +43,30 @@ class ImageProcessor
         }
 
         $resized = imagecreatetruecolor($targetWidth, $targetHeight);
+        // Create black background
+        $black = imagecolorallocate($resized, 0, 0, 0);
+        imagefill($resized, 0, 0, $black);
+
+        // Resample onto black background
         imagecopyresampled($resized, $image, 0, 0, 0, 0, $targetWidth, $targetHeight, $width, $height);
         return $resized;
     }
 
     public function extractPalette($image, $maxColors, $dither = true)
     {
-        // Create working copy
+        // Create working copy with black background
         $workingImage = imagecreatetruecolor(imagesx($image), imagesy($image));
+        $black        = imagecolorallocate($workingImage, 0, 0, 0);
+        imagefill($workingImage, 0, 0, $black);
         imagecopy($workingImage, $image, 0, 0, 0, 0, imagesx($image), imagesy($image));
 
         // First convert without dithering to get base palette
         imagetruecolortopalette($workingImage, false, $maxColors);
 
-        // Create final image
+        // Create final image with black background
         $palettedImage = imagecreatetruecolor(imagesx($image), imagesy($image));
+        $black         = imagecolorallocate($palettedImage, 0, 0, 0);
+        imagefill($palettedImage, 0, 0, $black);
         imagecopy($palettedImage, $image, 0, 0, 0, 0, imagesx($image), imagesy($image));
 
         // Now convert with dithering if enabled
@@ -61,8 +83,10 @@ class ImageProcessor
             ];
         }
 
+        // Ensure first color is black (background)
+        $palette[0] = ['r' => 0, 'g' => 0, 'b' => 0];
+
         imagedestroy($workingImage);
         return [$palette, $palettedImage];
     }
-
 }

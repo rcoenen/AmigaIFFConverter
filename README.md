@@ -2,17 +2,23 @@
 
 Convert modern image formats (JPEG, PNG) to the classic Amiga IFF ILBM format. This tool provides a simple way to create IFF images compatible with Amiga computers and emulators.
 
+## Why?
+
+Because why not? This tool lets you create images for a legendary computer system, the Commodore Amiga, just because you can. While plenty of tools can view or open IFF/ILBM files, very few actually let you create them. 
+
+Also, I was curious to see if it’s even possible to write such a tool in PHP. The last time I tried something like this was over 20 years ago—on an actual Amiga! This project is a way to test those limits, relive some nostalgia, and celebrate the creative quirks of the Amiga graphics legacy.
+
 ## Quick Start
 
 ```bash
 # Basic conversion with default settings
-php iff_convertor.php input.jpg output.iff
+php iff_convertor.php --input=input.jpg --output=output.iff
 
-# Specify size and colors (e.g., 320x200, 16 colors, no dither)
-php iff_convertor.php input.jpg output.iff 320 200 16 false true
+# Create a standard image with size and colors (e.g., 320x200, 16 colors, no dither)
+php iff_convertor.php --input=input.jpg --output=output.iff --width=320 --height=200 --colors=16 --dither=false --compress=true
 
-# Create hi-res PAL image (640x256, 4 colors)
-php iff_convertor.php input.jpg output.iff 640 256 4 true true
+# Generate a HAM6 image (e.g., 320x256)
+php iff_convertor.php --input=input.jpg --output=output_ham6.iff --width=320 --height=256 --ham=true --compress=true
 ```
 
 ## Features
@@ -20,9 +26,9 @@ php iff_convertor.php input.jpg output.iff 640 256 4 true true
 - Convert JPEG/PNG to IFF ILBM
 - Optional image resizing
 - Configurable color palettes (2-256 colors)
-- Floyd-Steinberg dithering (optional)
+- Hold-And-Modify (HAM6) support for classic Amiga chipsets
 - ByteRun1 compression support
-- Progress reporting during conversion
+- Works with PAL and NTSC resolutions
 
 ## Installation
 
@@ -40,62 +46,51 @@ cd AmigaIFFConverter
 ## Command Line Usage
 
 ```bash
-php iff_convertor.php <input_image> <output_iff> [width] [height] [colors] [dither] [compress]
+php iff_convertor.php --input=<input_image> --output=<output_iff> [--width=<width>] [--height=<height>] [--colors=<colors>] [--dither=<dither>] [--compress=<compress>] [--ham=<ham>]
 ```
 
 Parameters:
-- `input_image`: JPEG or PNG file
-- `output_iff`: Output IFF file name
-- `width`: Target width (optional, default=source width)
-- `height`: Target height (optional, default=source height)
-- `colors`: Number of colors (2-256, must be power of 2, default=32)
-- `dither`: Enable dithering (true/false, default=true)
-- `compress`: Enable compression (true/false, default=true)
-
-## Programming Interface
-
-```php
-require_once 'AmigaIFFConverter.php';
-
-$converter = new AmigaIFFConverter();
-$converter->convertToIFF('input.jpg', 'output.iff', [
-    'width' => 320,
-    'height' => 200,
-    'colors' => 16,
-    'dither' => false,
-    'compress' => true
-]);
-```
+- `--input`: JPEG or PNG file
+- `--output`: Output IFF file name
+- `--width`: Target width (optional, default=source width)
+- `--height`: Target height (optional, default=source height)
+- `--colors`: Number of colors (2-256, must be power of 2, default=32)
+- `--dither`: Enable dithering (true/false, default=true)
+- `--compress`: Enable compression (true/false, default=true)
+- `--ham`: Enable HAM mode (true/false, default=false)
 
 ## Recommended Settings
 
-### Low Resolution (320x200/256)
-Best for most Amiga games and demos:
+### Standard Palette Images
+
+- **Low Resolution (320x200/256):** Suitable for most Amiga games and demos.
+  ```bash
+  php iff_convertor.php --input=input.jpg --output=output.iff --width=320 --height=200 --colors=32 --dither=true --compress=true
+  ```
+
+- **Hi-Resolution (640x256):** Ideal for Workbench and productivity.
+  ```bash
+  php iff_convertor.php --input=input.jpg --output=output.iff --width=640 --height=256 --colors=16 --dither=true --compress=true
+  ```
+
+### HAM6 Images
+
+HAM6 mode creates high-fidelity images using 16 base colors and Hold-And-Modify techniques.
 ```bash
-php iff_convertor.php input.jpg output.iff 320 200 32 true true
+php iff_convertor.php --input=input.jpg --output=output_ham6.iff --width=320 --height=256 --ham=true --compress=true
 ```
 
-### Hi-Resolution (640x200/256)
-Good for Workbench and productivity software:
-```bash
-php iff_convertor.php input.jpg output.iff 640 256 16 true true
-```
-
-### Maximum Quality (32 colors)
-Balances color depth with file size:
-```bash
-php iff_convertor.php input.jpg output.iff 320 200 32 false true
-```
+*Note: HAM6 (6-bitplanes) was introduced with the original Amiga chipset. Later AGA models introduced HAM8, but this tool currently supports only the classic HAM6 mode.*
 
 ## Standard Amiga Resolutions
 
-| Mode | Width | Height | Common Colors |
-|------|--------|---------|--------------|
-| NTSC Low-Res | 320 | 200 | 32 |
-| PAL Low-Res | 320 | 256 | 32 |
-| NTSC Hi-Res | 640 | 200 | 16 |
-| PAL Hi-Res | 640 | 256 | 16 |
-| Productivity | 640 | 480 | 4 |
+| Mode           | Width | Height | Common Colors |
+|----------------|-------|--------|---------------|
+| NTSC Low-Res   | 320   | 200    | 32            |
+| PAL Low-Res    | 320   | 256    | 32            |
+| NTSC Hi-Res    | 640   | 200    | 16            |
+| PAL Hi-Res     | 640   | 256    | 16            |
+| Productivity   | 640   | 480    | 4             |
 
 ## Technical Details
 
@@ -106,44 +101,43 @@ The converter generates standard IFF ILBM files with:
 - CMAP (Color Map) chunk
 - BODY (Bitmap Data) chunk
 
-### Planar Data
-Amiga graphics use a planar format where each bit of a pixel's color index is stored in a separate bitplane. For example:
-- 16 colors = 4 bitplanes
-- 32 colors = 5 bitplanes
-- 64 colors = 6 bitplanes
+### HAM Mode
+In HAM6 mode, images are rendered using 16 base colors. Each pixel can either:
+1. Use a base color.
+2. Modify one component (R, G, or B) of the previous pixel's color.
+
+This creates a high-color effect while using only six bitplanes, a signature feature of classic Amiga chipsets.
 
 ### ByteRun1 Compression
 Optional RLE compression that supports:
-- Run-length encoding for repeated bytes
-- Literal runs for non-repeating data
-- Efficient encoding for both patterns
+- Run-length encoding for repeated bytes.
+- Literal runs for non-repeating data.
+- Efficient encoding for both patterns.
 
 ## Limitations
 
-- Input: Only JPEG and PNG supported
-- Colors: Must be power of 2 (2, 4, 8, 16, 32, 64, 128, 256)
-- No HAM (Hold-And-Modify) mode
-- No EHB (Extra-Half-Brite) mode
-- No support for masks or sprites
-- Basic dithering only
+- Input: Only JPEG and PNG supported.
+- Colors: Must be power of 2 (2, 4, 8, 16, 32, 64, 128, 256).
+- HAM mode: Currently supports only HAM6 (no HAM8 for AGA chipset).
+- No EHB (Extra-Half-Brite) mode.
+- No support for masks or sprites.
 
 ## Compatibility Notes
 
-- Best results with standard Amiga resolutions
+- Best results with standard Amiga resolutions.
 - Files are compatible with:
-  - Amiga OS and Workbench
-  - DPaint and other Amiga art programs
-  - Modern Amiga emulators
-  - IFF/ILBM viewers
+  - Amiga OS and Workbench.
+  - DPaint and other Amiga art programs.
+  - Modern Amiga emulators.
+  - IFF/ILBM viewers.
 
 ## Future Improvements
 
 Planned features:
-- HAM mode support
-- EHB mode support
-- Better color quantization
-- Additional dithering methods
-- More input formats
+- HAM8 mode support (AGA chipset).
+- EHB mode support.
+- Improved color quantization.
+- Additional dithering methods.
 
 ## Contributing
 
@@ -155,5 +149,5 @@ MIT License - see LICENSE file.
 
 ## Credits
 
-- Based on the IFF ILBM format by Electronic Arts (1985)
-- Uses PHP's GD library for image processing
+- Based on the IFF ILBM format by Electronic Arts (1985).
+- Uses PHP's GD library for image processing.

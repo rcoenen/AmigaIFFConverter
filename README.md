@@ -22,6 +22,17 @@ I actually enjoy seeing these artifacts, especially on modern Retina-powered Mac
 
 ---
 
+### **HAM6 Demonstration in Deluxe Paint IV**
+
+We converted a JPEG image to **HAM6** using this tool and opened it in **Deluxe Paint IV** to validate compatibility.
+
+#### **Screenshot**  
+![HAM6 Image in Deluxe Paint IV](demo_images/screenshot_dpaint.png)
+
+This confirms the tool produces authentic HAM6 images, complete with classic color fringing effects.
+
+---
+
 ## Experimental Support for ECS Compatibility
 
 This tool includes **experimental support for generating IFF images fully compatible with the [Amiga Enhanced Chip Set (ECS)](https://en.wikipedia.org/wiki/Amiga_Enhanced_Chip_Set)**. When using the `--chipset=ECS` option, the following features are applied:

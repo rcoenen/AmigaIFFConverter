@@ -62,6 +62,13 @@ The Hold-And-Modify (HAM6) mode is iconic to the Amiga:
 - Can show characteristic color fringing artifacts
 - Especially visible in areas with sharp color transitions
 
+#### HAM6 Demonstration in Deluxe Paint IV
+We converted a JPEG image to HAM6 using this tool and opened it in Deluxe Paint IV to validate compatibility.
+
+![HAM6 Image in Deluxe Paint IV](demo_images/screenshot_dpaint.png)
+
+This demonstrates authentic HAM6 output, complete with classic color fringing effects. These artifacts are particularly noticeable in areas with sharp color transitions - a characteristic quirk of the HAM6 mode that retro enthusiasts often appreciate!
+
 ## Technical Details
 
 The converter generates standard IFF ILBM files containing:

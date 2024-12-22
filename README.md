@@ -44,7 +44,7 @@ The IFF ILBM format is flexible and will accept colors from the full 24-bit RGB 
 - May not display correctly on actual Amiga hardware
 
 ### ECS Mode
-When using `--chipset=ECS`, the converter enforces actual Amiga ECS hardware limitations:
+When using `--chipset=ECS`, the converter enforces actual [Amiga Enhanced Chip Set (ECS)](https://en.wikipedia.org/wiki/Amiga_Enhanced_Chip_Set) hardware limitations:
 - Colors are clamped to 12-bit RGB space (4096 colors total)
 - Each color channel limited to 4-bit depth (16 levels, 0-15)
 - Maximum 32 simultaneous colors in standard modes
@@ -56,7 +56,7 @@ php iff_convertor.php --input=input.jpg --output=output_ecs.iff --width=320 --he
 ```
 
 ### HAM Mode
-The Hold-And-Modify (HAM6) mode is iconic to the Amiga:
+The [Hold-And-Modify (HAM)](https://en.wikipedia.org/wiki/Hold-And-Modify) mode is iconic to the Amiga:
 - Uses 16 base colors
 - Modifies previous pixel's color for high-color effects
 - Can show characteristic color fringing artifacts
